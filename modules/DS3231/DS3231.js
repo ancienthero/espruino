@@ -55,16 +55,9 @@ DS3231.prototype.isDST = function(day,month,dow) {
 }
 
 // Public functions
-// Set the day of the week, Sunday first day of the week
+// Set the day of the week, Sunday = 0, Monday = 1 etc..
 DS3231.prototype.setDow = function(day) {
-  var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  var idx = days.indexOf(day);
-  if (idx<0) {
-    print("Not a valid day");
-  }
-  else {
-    this.i2c.writeTo(C.i2c_address,[C.dowReg, (dec2bcd(1+idx))]);
- }
+  this.i2c.writeTo(C.i2c_address,[C.dowReg, (dec2bcd(1+day))]);
 };
 
 // Set the date
