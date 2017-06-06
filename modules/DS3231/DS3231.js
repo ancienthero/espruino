@@ -60,11 +60,11 @@ DS3231.prototype.setDow = function(day) {
   this.i2c.writeTo(C.i2c_address,[C.dowReg, (dec2bcd(1+day))]);
 };
 
-// Set the date
+// Set the date, date (1-31), month (0-11), year (eg: 2017)
 DS3231.prototype.setDate = function(date,month,year) {
   this.i2c.writeTo(C.i2c_address,[C.dateReg, (dec2bcd(date))]);
-  this.i2c.writeTo(C.i2c_address,[C.monthReg, (dec2bcd(month))]);
-  this.i2c.writeTo(C.i2c_address,[C.yearReg, (dec2bcd(year))]);
+  this.i2c.writeTo(C.i2c_address,[C.monthReg, (dec2bcd(month+1))]);
+  this.i2c.writeTo(C.i2c_address,[C.yearReg, (dec2bcd(year-2000))]);
   this.dstStatus = this.isDST(date,month,year);
 };
 
@@ -104,10 +104,10 @@ DS3231.prototype.readDateTime = function (select) {
   switch (select) {
     case "hours": return hours;
     case "minutes" : return minutes;
-    case "dow" : return dow;
+    case "dow" : return dow-1;
     case "date" : return date;
-    case "month" : return month;
-    case "year" : return year;
+    case "month" : return month-1;
+    case "year" : return 2000+year;
     default: {
       return new Date(2000+year, month-1, date, hours, minutes, seconds);
     }
