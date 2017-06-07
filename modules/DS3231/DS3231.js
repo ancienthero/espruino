@@ -9,7 +9,7 @@ function DS3231(i2c, options) {
   this.options = options || {};
   // are we doing daylight saving time calcs?
   if (this.options.DST===undefined)
-    this.options.DST = true;
+    this.options.DST = false;
   // current state of daylight saving
   this.dstStatus = false;
 }
@@ -89,14 +89,14 @@ DS3231.prototype.readDateTime = function (select) {
 
   if (hours === 2 && minutes === 0 && seconds === 0 && this.isDST(date,month,dow) === true && this.dstStatus === false) {
     // clocks go forward, CEST
-    this.i2c.writeTo(C.i2c_address,[C.hourReg, (dec2bcd(2))]);
+    this.i2c.writeTo(C.i2c_address,[C.hourReg, (dec2bcd(3))]);
     hours = 3;
     this.dstStatus = true;
   }
 
   if (hours === 3 && minutes === 0 && seconds === 0 && this.isDST(date,month,dow) === false && this.dstStatus === true) {
     // clocks go back, CET
-    this.i2c.writeTo(C.i2c_address,[C.hourReg, (dec2bcd(1))]);
+    this.i2c.writeTo(C.i2c_address,[C.hourReg, (dec2bcd(2))]);
     hours = 2;
     this.dstStatus = false;
   }
