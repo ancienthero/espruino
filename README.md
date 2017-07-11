@@ -1,4 +1,5 @@
 # espruino
-espruino is a JS driven microcontroller
+__espruino__ is a Javascript interpreter for STM32 ARM microcontrollers.
+This repo contains my modules, projects, tutorials.
 
-this repo contains my modules, projects, tutorials
+:tada: :soon:
