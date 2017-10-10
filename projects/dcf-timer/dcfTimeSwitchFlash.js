@@ -535,7 +535,6 @@ function main() {
   }, MENU, wOptions);
 }
 
-// SPI
 function onInit() {
   // real time clock initalize
   I2C1.setup({
