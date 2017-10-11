@@ -34,17 +34,6 @@ month | 0-11
 day of the week | 0-6
 year | eg: 2017
 
-
-<!-- The following reads from the RTC module and prints the date and time in a string to the console every second.
-
-```Javascript
-I2C1.setup({scl:B6,sda:B7});
-var rtc = require("DS3231").connect(I2C1, { DST : true });
-setInterval(function() {
-  console.log(rtc.readDateTime());
-}, 1000);
-``` -->
-
 Initialising
 ------------
 
