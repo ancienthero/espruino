@@ -23,7 +23,7 @@ This document assumes that you are using one of cheap RTC modules for Raspberry 
 
 **Note:** This module is designed to be compatible with the [JS date object](https://www.w3schools.com/jsref/jsref_obj_date.asp)
 
-property | value
+properity| value
 ----| ----
 miliseconds | 0-999
 seconds | 0-59
@@ -91,7 +91,7 @@ var t = rtc.readDateTime();
 console.log(t.toString());
 ```
 
-Reading single property:
+Reading single properity:
 ```Javascript
 // can be "hours", "minutes", "dow", "date", "month", "year"
 rtc.readDateTime("hours");
