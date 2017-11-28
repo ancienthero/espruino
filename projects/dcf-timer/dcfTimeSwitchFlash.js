@@ -83,28 +83,34 @@ function isInArray(value, array) {
 function writeToFlash(arr, addr) {
   var flashStr = "";
   addr = addr ? addr : 0;
-  if(!arr.length) {
+  if (!arr.length) {
     f.write(addr, "");
     return;
   }
   for (var x in arr) {
-    flashStr += arr[x].h+"."+arr[x].m+"."+arr[x].d+"."+arr[x].t+".";
+    flashStr += arr[x].h + "." + arr[x].m + "." + arr[x].d + "." + arr[x].t + ".";
   }
-  flashStr = flashStr.slice(0,-1);
+  flashStr = flashStr.slice(0, -1);
   f.write(addr, flashStr);
 }
 
 // read from build-in flash memory
 function readFromFlash(addr) {
-  var flashStr = "", arr = [], out = [];
-  if (addr === undefined || f.read(addr) === undefined) {return out;}
+  var flashStr = "",
+    arr = [],
+    out = [];
+  if (addr === undefined || f.read(addr) === undefined) {
+    return out;
+  }
   flashStr = E.toString(f.read(addr));
   arr = flashStr.split(".");
-  for (var i=0;i<arr.length;i+=4) {
-    var date = {h:Number(arr[i]),
-                m:Number(arr[i+1]),
-                d:Number(arr[i+2]),
-                t:arr[i+3]};
+  for (var i = 0; i < arr.length; i += 4) {
+    var date = {
+      h: Number(arr[i]),
+      m: Number(arr[i + 1]),
+      d: Number(arr[i + 2]),
+      t: arr[i + 3]
+    };
     out.push(date);
   }
   return out;
@@ -139,7 +145,7 @@ function oledInit() {
 
 // dcf synchronization
 function syncDcf(val) {
-  if (dcf.status === false && ((isInArray(rtc.readDateTime("hours"), [2, 3, 4]) && rtc.readDateTime("minutes") === 0) || val === true)) {
+  if (dcf.status === false && (val === true || isInArray(rtc.readDateTime("hours"), [2, 3, 4]) && rtc.readDateTime("minutes") === 0)) {
     dcf.status = true;
     dcf.errCount = 0;
     dcf.last = 0;
@@ -162,19 +168,22 @@ function singleMessage(msg, callback) {
 }
 
 function lookUpTimes() {
-  var arr = [];
-  arr.push.apply(arr, onTimes);
-  arr.push.apply(arr, offTimes);
+  var i = 0;
   g.clear();
-  if (arr.length === 0) {
+  if (!onTimes.length && !offTimes.length) {
     g.drawString("NOTHING TO DISPLAY", 8, 10);
-  }
-  if (arr.length < 6) {
     g.drawString("BACK", 8, 50);
     g.drawString(">", 0, 50);
-  }
-  for (var i = 0; i < arr.length; i++) {
-    g.drawString(format(arr[i].h) + ":" + format(arr[i].m) + "  " + days[arr[i].d] + "  " + arr[i].t, 8, 10 * i);
+  } else {
+    g.drawString("ON TIMES", 0, 0);
+    g.drawString("OFF TIMES", 64, 0);
+    g.drawLine(60, 10, 60, 60);
+    for (i = 0; i < onTimes.length; i++) {
+      g.drawString(format(onTimes[i].h) + ":" + format(onTimes[i].m) + " " + days[onTimes[i].d], 0, 10 * i + 10);
+    }
+    for (i = 0; i < offTimes.length; i++) {
+      g.drawString(format(offTimes[i].h) + ":" + format(offTimes[i].m) + " " + days[offTimes[i].d], 64, 10 * i + 10);
+    }
   }
   g.flip();
   w1 = setWatch(function() {
@@ -234,10 +243,10 @@ function delOnOffTime() {
       case 1:
         if (item <= onTimes.length - 1) {
           onTimes.splice(item, 1);
-          writeToFlash(onTimes,0);
+          writeToFlash(onTimes, 0);
         } else if (offTimes.length) {
           offTimes.splice(item - onTimes.length, 1);
-          writeToFlash(offTimes,1);
+          writeToFlash(offTimes, 1);
         }
         clearW([w1, w2, w3, w4, w5]);
         mainMenu();
@@ -290,7 +299,7 @@ function mainView() {
 
 function mainMenuView(cursor) {
   g.clear();
-  g.drawString("SYNC DCF77", 8, 0);
+  dcf.status ? g.drawString("CANCEL SYNC DCF77", 8, 0) : g.drawString("SYNC DCF77", 8, 0);
   g.drawString("SET DATE TIME", 8, 10);
   g.drawString("ADD ON/OFF TIME", 8, 20);
   g.drawString("DELETE ON/OFF TIME", 8, 30);
@@ -398,12 +407,12 @@ function setOnOffTime() {
     if (position === 4) {
       if (date.t === "ON") {
         onTimes.unshift(date);
-        onTimes.length > 3 ? onTimes.pop() : null;
-        writeToFlash(onTimes,0);
+        onTimes.length > 5 ? onTimes.pop() : null;
+        writeToFlash(onTimes, 0);
       } else {
         offTimes.unshift(date);
-        offTimes.length > 3 ? offTimes.pop() : null;
-        writeToFlash(offTimes,1);
+        offTimes.length > 5 ? offTimes.pop() : null;
+        writeToFlash(offTimes, 1);
       }
       clearW([w1, w2, w3, w4, w5]);
       mainMenu();
@@ -504,7 +513,7 @@ function mainMenu() {
     clearW([w1, w2, w3, w4, w5]);
     switch (position) {
       case 0:
-        syncDcf(true);
+        dcf.status ? dcf.shutdown() : syncDcf(true);
         main();
         break;
       case 1:
@@ -541,7 +550,7 @@ function onInit() {
     scl: B6,
     sda: B7
   });
-  rtc = require("https://github.com/ancienthero/espruino/blob/master/modules/DS3231/DS3231.js").connect(I2C1);
+  rtc = require("https://github.com/ancienthero/espruino/blob/master/modules/DS3231/DS3231.min.js").connect(I2C1);
   //oled init
   s = new SPI();
   s.setup({
@@ -561,7 +570,7 @@ require("DCF77").connect(A7, function(err, date, info) {
   if (err) {
     // console.log("Error: " + err);
     dcf.errCount++;
-    if (dcf.errCount > 30) {
+    if (dcf.errCount > 15) {
       dcf.shutdown();
     }
   } else {
