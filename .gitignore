@@ -1,0 +1,5 @@
+# gitignore
+modules/**/minify.js
+modules/**/bin
+testing/
+snippets/
